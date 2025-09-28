@@ -1,32 +1,66 @@
-# MultiLoader Template
+### Goal: Register game objects from `common` instead of `fabric`/`forge`/`neoforge` projects
 
-This project provides a Gradle project template that can compile Minecraft mods for multiple modloaders using a common project for the sources. This project does not require any third party libraries or dependencies. If you have any questions or want to discuss the project, please join our [Discord](https://discord.myceliummod.network).
+---
 
-## Getting Started
+What are our options?
 
-### IntelliJ IDEA
-This guide will show how to import the MultiLoader Template into IntelliJ IDEA. The setup process is roughly equivalent to setting up the modloaders independently and should be very familiar to anyone who has worked with their MDKs.
+What we'll review, ordered by complexity of updating our project:
 
-1. Clone or download this repository to your computer.
-2. Configure the project by setting the properties in the `gradle.properties` file. You will also need to change the `rootProject.name`  property in `settings.gradle`, this should match the folder name of your project, or else IDEA may complain.
-3. Open the template's root folder as a new project in IDEA. This is the folder that contains this README.md file and the gradlew executable.
-4. If your default JVM/JDK is not Java 21 you will encounter an error when opening the project. This error is fixed by going to `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JVM` and changing the value to a valid Java 21 JVM. You will also need to set the Project SDK to Java 21. This can be done by going to `File > Project Structure > Project SDK`. Once both have been set open the Gradle tab in IDEA and click the refresh button to reload the project.
-5. Open your Run/Debug Configurations. Under the `Application` category there should now be options to run Fabric and NeoForge projects. Select one of the client options and try to run it.
-6. Assuming you were able to run the game in step 5 your workspace should now be set up.
+1. Mimicking `Botania`, no extra dependencies
+2. Adding `RegistrationUtils`, soft-dependency which shadows itself into our final jar
+3. Adding `Bookshelf`, hard-dependency which has very accessible content registration
+4. Moving to `Architectury`, another project like MultiLoader-Template but adds more functionality
 
-### Eclipse
-While it is possible to use this template in Eclipse it is not recommended. During the development of this template multiple critical bugs and quirks related to Eclipse were found at nearly every level of the required build tools. While we continue to work with these tools to report and resolve issues support for projects like these are not there yet. For now Eclipse is considered unsupported by this project. The development cycle for build tools is notoriously slow so there are no ETAs available.
+---
 
-## Development Guide
-When using this template the majority of your mod should be developed in the `common` project. The `common` project is compiled against the vanilla game and is used to hold code that is shared between the different loader-specific versions of your mod. The `common` project has no knowledge or access to ModLoader specific code, apis, or concepts. Code that requires something from a specific loader must be done through the project that is specific to that loader, such as the `fabric` or `neoforge` projects.
+What does registering new game objects look like traditionally (for mod-loader specific project)?
 
-Loader specific projects such as the `fabric` and `neoforge` project are used to load the `common` project into the game. These projects also define code that is specific to that loader. Loader specific projects can access all the code in the `common` project. It is important to remember that the `common` project can not access code from loader specific projects.
+> Reference tutorials created by Kaupenjoe
+>
+for [NeoForge](https://github.com/Tutorials-By-Kaupenjoe/NeoForge-Tutorial-1.21.X/blob/main/src/main/java/net/kaupenjoe/tutorialmod/TutorialMod.java)
 
-## Removing Platforms and Loaders
-While this template has support for many modloaders, new loaders may appear in the future, and existing loaders may become less relevant.
+---
 
-Removing loader specific projects is as easy as deleting the folder, and removing the `include("projectname")` line from the `settings.gradle` file.
-For example if you wanted to remove support for `forge` you would follow the following steps:
+How can we achieve a traditional approach to registering game objects in our MultiLoader-Template
+based project?
 
-1. Delete the subproject folder. For example, delete `MultiLoader-Template/forge`.
-2. Remove the project from `settings.gradle`. For example, remove `include("forge")`. 
+# 1. Mimicking [Botania](https://www.curseforge.com/minecraft/mc-mods/botania)
+
+---
+
+1. Game objects (Blocks, Items, Entities, etc.) are defined as public static fields in `common`
+2. Those game objects are added to a bi-consumer in a public method in `common` along with a
+   ResourceLocation
+3. Our mod loader entrypoints consumes that public method (i.e. `ModBlocks#register`) to bind
+   game objects keyed to a ResourceLocation to a Minecraft registry
+4. Our game objects are registered!
+
+# 2. Adding [RegistrationUtils](https://github.com/Matyrobbrt/RegistrationUtils)
+
+1. `RegistrationUtils` is added
+   as [a plugin from the Gradle plugin portal](https://plugins.gradle.org/plugin/com.matyrobbrt.mc.registrationutils)
+   to our root `build.gradle` file, along
+   with [configuration](https://github.com/Matyrobbrt/RegistrationUtils)
+2. We define a RegistrationProvider in `common` which is similar to Forge's DeferredRegister
+3. We define new game objects as public static fields of RegistryObject created from registering to
+   a RegistrationProvider
+4. RegistrationUtils handles the rest, as long as our fields are loaded via class access or other
+   means
+
+---
+
+# 3. Adding [Bookshelf](https://www.curseforge.com/minecraft/mc-mods/bookshelf)
+
+1. `Bookshelf` is added as a dependency for `common` and mod-loader-specific projects
+2. We define a new class implementing IContentProvider from Bookshelf, and define our game objects
+3. We create a
+   new [provider-configuration file](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html)
+   for our content provider with the fully-qualified binary name of the service's type (i.e.
+   `net.darkhax.bookshelf.common.api.registry.IContentProvider`)
+4. Bookshelf handles the rest!
+
+---
+
+# 4. Moving to [Architectury](https://www.curseforge.com/minecraft/mc-mods/architectury-api)
+
+---
