@@ -1,8 +1,6 @@
 package io.github.jason13official.my_cool_mod;
 
 import io.github.jason13official.my_cool_mod.platform.Services;
-import io.github.jason13official.my_cool_mod.registry.ModBlocks;
-import io.github.jason13official.my_cool_mod.registry.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Items;
 
@@ -29,8 +27,5 @@ public class CommonClass {
 
             Constants.LOG.info("Hello to our mod!");
         }
-
-        ModBlocks.register();
-        ModItems.register();
     }
 }
