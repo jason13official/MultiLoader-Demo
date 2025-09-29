@@ -1,5 +1,7 @@
 package io.github.jason13official.my_cool_mod.platform.services;
 
+import net.minecraft.world.item.CreativeModeTab;
+
 public interface IPlatformHelper {
 
     /**
@@ -33,4 +35,6 @@ public interface IPlatformHelper {
 
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    CreativeModeTab.Builder tabBuilder();
 }

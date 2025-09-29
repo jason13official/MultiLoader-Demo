@@ -2,6 +2,7 @@ package io.github.jason13official.my_cool_mod;
 
 import io.github.jason13official.my_cool_mod.registry.ModBlocks;
 import io.github.jason13official.my_cool_mod.registry.ModItems;
+import io.github.jason13official.my_cool_mod.registry.ModTabs;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.fabricmc.api.ModInitializer;
@@ -21,6 +22,7 @@ public class ExampleMod implements ModInitializer {
 
     bind(BuiltInRegistries.BLOCK, ModBlocks::register);
     bind(BuiltInRegistries.ITEM, ModItems::register);
+    bind(BuiltInRegistries.CREATIVE_MODE_TAB, ModTabs::register);
 
     Constants.LOG.info("Game objects registered!");
   }
