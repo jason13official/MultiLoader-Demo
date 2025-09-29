@@ -14,6 +14,21 @@ public class ExampleMod implements ModInitializer {
 
   @Override
   public void onInitialize() {
+
     CommonClass.init();
+
+    Constants.LOG.info("Mod initialized in Fabric!");
+
+    bind(BuiltInRegistries.BLOCK, ModBlocks::register);
+    bind(BuiltInRegistries.ITEM, ModItems::register);
+
+    Constants.LOG.info("Game objects registered!");
+  }
+
+  /** Adapted from <a href="https://github.com/VazkiiMods/Botania">Botania</a> */
+  private static <T> void bind(
+      Registry<T> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {
+    Constants.LOG.info("binding objects to {}", registry);
+    source.accept((t, rl) -> Registry.register(registry, rl, t));
   }
 }
