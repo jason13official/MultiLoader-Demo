@@ -15,25 +15,9 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 @Mod(Constants.MOD_ID)
 public class ExampleMod {
 
-  public static IEventBus eventBus;
-
   public ExampleMod(IEventBus eventBus) {
 
-    ExampleMod.eventBus = eventBus;
 
     CommonClass.init();
-
-    bind(Registries.BLOCK, ModBlocks::register);
-    bind(Registries.ITEM, ModItems::register);
-  }
-
-  /** Adapted from <a href="https://github.com/VazkiiMods/Botania">Botania</a> */
-  private static <T> void bind(
-      ResourceKey<Registry<T>> registry, Consumer<BiConsumer<T, ResourceLocation>> source) {
-    eventBus.addListener((RegisterEvent event) -> {
-      if (registry.equals(event.getRegistryKey())) {
-        source.accept((t, rl) -> event.register(registry, rl, () -> t));
-      }
-    });
   }
 }
